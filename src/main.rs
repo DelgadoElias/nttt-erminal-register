@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
-use crossterm::{event, execute, terminal, ExecutableCommand};
+use crossterm::{event, execute, terminal::{Clear, ClearType}};
 use once_cell::sync::Lazy;
-use ratatui::{backend::CrosstermBackend, layout::*, style::*, widgets::*, Terminal};
+use ratatui::{backend::CrosstermBackend, style::*, widgets::*, Terminal};
 use std::collections::HashMap;
 use std::sync::Mutex;
 
@@ -32,7 +32,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Commands::Register { name, port } => {
             let mut cache = CACHE.lock().unwrap();
             cache.insert(name.clone(), *port);
-            println!("Registrado: {} en el puerto {}", name, port);
+            println!("Registered: {} in port {}", name, port);
         }
         Commands::Start => start_tui()?,
     }
@@ -63,8 +63,7 @@ fn start_tui() -> Result<(), Box<dyn std::error::Error>> {
                     }
                     event::KeyCode::Char('d') => {
                         let mut cache = CACHE.lock().unwrap();
-                        let name_to_remove = cache.keys().nth(selected).cloned();
-                        if let Some(name) = name_to_remove {
+                        if let Some(name) = cache.keys().nth(selected).cloned() {
                             cache.remove(&name);
                         }
                     }
@@ -78,7 +77,10 @@ fn start_tui() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn ui(f: &mut ratatui::Frame, selected: usize) {
-    let size = f.size(); // Utiliza el método area() para obtener el tamaño del marco
+    // Limpia la pantalla antes de renderizar
+    execute!(std::io::stdout(), Clear(ClearType::All)).unwrap();
+
+    let size = f.size(); // Utiliza el método size() para obtener el tamaño del marco
     let cache = CACHE.lock().unwrap();
     
     let items: Vec<ListItem> = cache
@@ -97,4 +99,3 @@ fn ui(f: &mut ratatui::Frame, selected: usize) {
     // Renderiza el widget con el estado adecuado
     f.render_stateful_widget(list, size, &mut list_state);
 }
-

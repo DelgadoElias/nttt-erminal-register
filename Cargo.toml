@@ -8,3 +8,4 @@ clap = { version = "4.0", features = ["derive"] }
 ratatui = { version = "0.23.1-alpha.6" }
 crossterm = "0.24"
 once_cell = "1.18"  # Para manejar una cache global
+redis = "0.27.3"
